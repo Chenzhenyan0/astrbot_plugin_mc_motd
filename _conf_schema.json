@@ -1,0 +1,50 @@
+{
+  "default_server_address": {
+    "description": "默认服务器地址",
+    "type": "string",
+    "default": "",
+    "hint": "无参数使用 /motd 时查询的服务器（域名或 IP），如 play.example.com。留空表示未配置。"
+  },
+  "default_server_port": {
+    "description": "默认服务器端口",
+    "type": "int",
+    "default": 0,
+    "hint": "留空或 0 时按版本自动取默认端口（Java 25565 / 基岩 19132）。范围 1-65535。"
+  },
+  "default_server_edition": {
+    "description": "默认服务器版本",
+    "type": "string",
+    "default": "java",
+    "hint": "可选 java 或 bedrock"
+  },
+  "api_base_url": {
+    "description": "MOTD API 基础地址",
+    "type": "string",
+    "default": "https://motd.frostlynx.work/v1",
+    "hint": "一般无需修改"
+  },
+  "request_timeout": {
+    "description": "请求超时时间（秒）",
+    "type": "int",
+    "default": 15,
+    "hint": "网络请求与图片生成的超时时间"
+  },
+  "card_theme": {
+    "description": "状态卡片主题",
+    "type": "string",
+    "default": "dark",
+    "hint": "可选 dark（暗色）或 light（亮色）"
+  },
+  "card_width": {
+    "description": "状态卡片宽度（像素）",
+    "type": "int",
+    "default": 880,
+    "hint": "建议 600-1200"
+  },
+  "font_path": {
+    "description": "自定义字体文件路径",
+    "type": "string",
+    "default": "",
+    "hint": "留空时自动查找系统中文字体；若 MOTD 中文显示为方块，请填写一个支持中文的 ttf/ttc/otf 字体绝对路径"
+  }
+}
