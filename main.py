@@ -345,6 +345,48 @@ def render_status_card(
 # ---------------------------------------------------------------------------
 
 
+def resolve_default_server(config: dict) -> tuple:
+    """读取并校验默认服务器配置，返回 (edition, address, port)。
+
+    地址为空、端口越界、版本非 java/bedrock 时视为未配置，抛出 ValueError。
+    """
+    address = str(config.get("default_server_address", "") or "").strip()
+    edition_raw = str(config.get("default_server_edition", "java") or "java").lower()
+    try:
+        port_val = int(config.get("default_server_port", 0) or 0)
+    except (TypeError, ValueError):
+        port_val = -1
+
+    invalid = (
+        not address
+        or edition_raw not in DEFAULT_PORTS
+        or port_val < 0
+        or port_val > 65535
+    )
+    if invalid:
+        raise ValueError(
+            "尚未配置默认服务器（或配置无效）。\n"
+            "请使用 /motd java <地址> [端口] 或 /motd bedrock <地址> [端口] 手动查询，"
+            "或联系管理员在 WebUI 插件配置中填写默认服务器信息。"
+        )
+    port = port_val if port_val > 0 else DEFAULT_PORTS[edition_raw]
+    return edition_raw, address, port
+
+
+def format_default_address(config: dict) -> str:
+    """生成 /地址 指令的回复文本（直接输出配置好的默认服务器地址）。"""
+    try:
+        edition, address, port = resolve_default_server(config)
+    except ValueError:
+        return (
+            "尚未配置默认服务器地址。\n"
+            "请联系管理员在 WebUI 插件配置中填写 default_server_address，"
+            "或使用 /motd java <地址> 手动查询。"
+        )
+    label = EDITION_LABELS.get(edition, edition)
+    return f"默认服务器：{address}:{port}（{label}）\n发送 /motd 即可查看实时状态。"
+
+
 def parse_motd_args(args: list, config: dict) -> tuple:
     """解析 /motd 指令参数，返回 (edition, address, port)。
 
@@ -373,31 +415,8 @@ def parse_motd_args(args: list, config: dict) -> tuple:
         return p
 
     if not args:
-        # 无参数：读取默认服务器配置
-        address = str(config.get("default_server_address", "") or "").strip()
-        edition_raw = str(
-            config.get("default_server_edition", "java") or "java"
-        ).lower()
-        port_raw = config.get("default_server_port", 0)
-        try:
-            port_val = int(port_raw or 0)
-        except (TypeError, ValueError):
-            port_val = -1
-
-        invalid = (
-            not address
-            or edition_raw not in DEFAULT_PORTS
-            or port_val < 0
-            or port_val > 65535
-        )
-        if invalid:
-            raise ValueError(
-                "尚未配置默认服务器（或配置无效）。\n"
-                "请使用 /motd java <地址> [端口] 或 /motd bedrock <地址> [端口] 手动查询，"
-                "或联系管理员在 WebUI 插件配置中填写默认服务器信息。"
-            )
-        port = port_val if port_val > 0 else DEFAULT_PORTS[edition_raw]
-        return edition_raw, address, port
+        # 无参数：读取默认服务器配置（与 /地址 指令共用同一套校验逻辑）
+        return resolve_default_server(config)
 
     first = args[0].lower()
     if first in DEFAULT_PORTS:
@@ -433,7 +452,7 @@ def parse_motd_args(args: list, config: dict) -> tuple:
     "astrbot_plugin_mc_motd",
     "AstrBot Developer",
     "查询 Minecraft 服务器 MOTD 状态并渲染为图片卡片",
-    "v1.0.0",
+    "v1.1.0",
     "https://github.com/AstrBotDevs/AstrBot",
 )
 class McMotdPlugin(Star):
@@ -447,7 +466,7 @@ class McMotdPlugin(Star):
         timeout = self._get_timeout()
         self._session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=timeout),
-            headers={"User-Agent": "AstrBot-McMotd-Plugin/1.0"},
+            headers={"User-Agent": "AstrBot-McMotd-Plugin/1.1"},
         )
 
     async def terminate(self):
@@ -472,7 +491,7 @@ class McMotdPlugin(Star):
         if self._session is None or self._session.closed:
             self._session = aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=self._get_timeout()),
-                headers={"User-Agent": "AstrBot-McMotd-Plugin/1.0"},
+                headers={"User-Agent": "AstrBot-McMotd-Plugin/1.1"},
             )
         return self._session
 
@@ -551,3 +570,13 @@ class McMotdPlugin(Star):
             return
 
         yield event.image_result(out_path)
+
+    @filter.command("地址")
+    async def default_address(self, event: AstrMessageEvent):
+        """输出当前配置的默认服务器地址（不发起查询）。"""
+        yield event.plain_result(format_default_address(self.config))
+
+    @filter.command("address")
+    async def default_address_en(self, event: AstrMessageEvent):
+        """输出当前配置的默认服务器地址（英文指令别名）。"""
+        yield event.plain_result(format_default_address(self.config))
