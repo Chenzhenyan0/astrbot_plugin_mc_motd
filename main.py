@@ -450,10 +450,10 @@ def parse_motd_args(args: list, config: dict) -> tuple:
 
 @register(
     "astrbot_plugin_mc_motd",
-    "AstrBot Developer",
+    "Chenzhenyan0",
     "查询 Minecraft 服务器 MOTD 状态并渲染为图片卡片",
-    "v1.1.0",
-    "https://github.com/AstrBotDevs/AstrBot",
+    "v1.1.1",
+    "https://github.com/Chenzhenyan0/astrbot_plugin_mc_motd",
 )
 class McMotdPlugin(Star):
     def __init__(self, context: Context, config: dict | None = None):
@@ -466,7 +466,7 @@ class McMotdPlugin(Star):
         timeout = self._get_timeout()
         self._session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=timeout),
-            headers={"User-Agent": "AstrBot-McMotd-Plugin/1.1"},
+            headers={"User-Agent": "AstrBot-McMotd-Plugin/1.1.1"},
         )
 
     async def terminate(self):
@@ -491,7 +491,7 @@ class McMotdPlugin(Star):
         if self._session is None or self._session.closed:
             self._session = aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=self._get_timeout()),
-                headers={"User-Agent": "AstrBot-McMotd-Plugin/1.1"},
+                headers={"User-Agent": "AstrBot-McMotd-Plugin/1.1.1"},
             )
         return self._session
 

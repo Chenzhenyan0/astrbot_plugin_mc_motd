@@ -1,8 +1,8 @@
 name: astrbot_plugin_mc_motd
 desc: 查询 Minecraft 服务器（Java 版 / 基岩版）MOTD 状态，并将结果渲染为图片卡片发送。支持配置默认服务器，直接 /motd 一键查询。
-version: v1.1.0
-author: AstrBot Developer
-repo: https://github.com/AstrBotDevs/AstrBot
+version: v1.1.1
+author: Chenzhenyan0
+repo: https://github.com/Chenzhenyan0/astrbot_plugin_mc_motd
 display_name: Minecraft MOTD 查询
 short_desc: 以图片卡片形式查询 MC 服务器 MOTD 与在线状态
 support_platforms:
